@@ -1,15 +1,17 @@
 package org.mufasadev.ecommerce.project.service;
 
 import org.mufasadev.ecommerce.project.models.Category;
+import org.mufasadev.ecommerce.project.payload.CategoryDTO;
+import org.mufasadev.ecommerce.project.payload.CategoryResponse;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getAllCategories();
+    CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-    void createCategory(Category category);
+    CategoryDTO createCategory(CategoryDTO category);
 
-    String deleteCategory(long categoryId);
+    CategoryDTO deleteCategory(long categoryId);
 
-    void updateCategory(Category category, Long categoryId);
+    CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId);
 }
