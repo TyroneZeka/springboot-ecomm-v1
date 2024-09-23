@@ -2,7 +2,6 @@ package org.mufasadev.ecommerce.project.controller;
 
 import jakarta.validation.Valid;
 import org.mufasadev.ecommerce.project.config.AppConstants;
-import org.mufasadev.ecommerce.project.models.Category;
 import org.mufasadev.ecommerce.project.payload.CategoryDTO;
 import org.mufasadev.ecommerce.project.payload.CategoryResponse;
 import org.mufasadev.ecommerce.project.service.CategoryService;
