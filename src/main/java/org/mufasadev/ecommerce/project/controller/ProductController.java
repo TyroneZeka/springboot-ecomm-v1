@@ -8,6 +8,9 @@ import org.mufasadev.ecommerce.project.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
@@ -53,5 +56,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.deleteProduct(productId));
     }
 
-
+    @PutMapping("/admin/products/{productId}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId, @RequestParam("image") MultipartFile file) throws IOException {
+        ProductDTO updatedProductDTO = productService.updateProductImage(productId,file);
+        return new ResponseEntity<>(updatedProductDTO,HttpStatus.OK);
+    }
 }

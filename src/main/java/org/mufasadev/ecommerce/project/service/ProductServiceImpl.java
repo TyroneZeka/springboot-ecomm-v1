@@ -9,11 +9,12 @@ import org.mufasadev.ecommerce.project.payload.ProductDTO;
 import org.mufasadev.ecommerce.project.payload.ProductResponse;
 import org.mufasadev.ecommerce.project.repository.CategoryRepository;
 import org.mufasadev.ecommerce.project.repository.ProductRepository;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,11 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final FileService fileService;
     private final ModelMapper modelMapper;
+
+    @Value("${project.images}")
+    private String imagePath;
 
     @Override
     public ProductDTO addProduct(Long categoryId, Product product) {
@@ -86,4 +91,13 @@ public class ProductServiceImpl implements ProductService{
         return modelMapper.map(product, ProductDTO.class);
     }
 
+    @Override
+    public ProductDTO updateProductImage(Long productId, MultipartFile file) throws IOException {
+        Product product = productRepository.findById(productId).orElseThrow(()-> new ResourceNotFoundException("Product","ProductId",productId));
+        String path = imagePath;
+        String fileName = fileService.uploadImage(path,file);
+        product.setImage(fileName);
+        Product savedProduct = productRepository.save(product);
+        return modelMapper.map(savedProduct, ProductDTO.class);
+    }
 }
