@@ -1,6 +1,5 @@
 package org.mufasadev.ecommerce.project.service;
 
-import org.mufasadev.ecommerce.project.models.Product;
 import org.mufasadev.ecommerce.project.payload.ProductDTO;
 import org.mufasadev.ecommerce.project.payload.ProductResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,10 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ProductService {
-    ProductDTO addProduct(Long categoryId, Product product);
-    ProductResponse getAllProducts();
-    ProductResponse getByCategory(Long categoryId);
-    ProductResponse getProductsByKeyword(String keyword);
+    ProductDTO addProduct(Long categoryId, ProductDTO productDTO);
+    ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductResponse getByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
     ProductDTO updateProduct(Long productId, ProductDTO productDTO);
 

@@ -2,6 +2,7 @@ package org.mufasadev.ecommerce.project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.mufasadev.ecommerce.project.exceptions.APIException;
 import org.mufasadev.ecommerce.project.exceptions.ResourceNotFoundException;
 import org.mufasadev.ecommerce.project.models.Category;
 import org.mufasadev.ecommerce.project.models.Product;
@@ -10,16 +11,20 @@ import org.mufasadev.ecommerce.project.payload.ProductResponse;
 import org.mufasadev.ecommerce.project.repository.CategoryRepository;
 import org.mufasadev.ecommerce.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
-
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -30,42 +35,69 @@ public class ProductServiceImpl implements ProductService{
     private String imagePath;
 
     @Override
-    public ProductDTO addProduct(Long categoryId, Product product) {
+    public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","CategoryId",categoryId));
-        product.setCategory(category);
-        product.setImage("default.png");
-        double specialPrice = product.getPrice() - ((0.01 * product.getDiscount()) * product.getPrice());
-        product.setSpecialPrice(specialPrice);
-        Product savedProduct = productRepository.save(product);
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        boolean isProductPresent = false;
+        List<Product> products = category.getProducts();
+        for (Product product : products) {
+            if (Objects.equals(product.getProductName(), productDTO.getProductName())) {
+                isProductPresent = true;
+                break;
+            }
+        }
+        if (!isProductPresent) {
+            Product product = modelMapper.map(productDTO, Product.class);
+            product.setCategory(category);
+            product.setImage("default.png");
+            double specialPrice = product.getPrice() - ((0.01 * product.getDiscount()) * product.getPrice());
+            product.setSpecialPrice(specialPrice);
+            Product savedProduct = productRepository.save(product);
+            return modelMapper.map(savedProduct, ProductDTO.class);
+        }else {
+            throw new APIException("Product Already Exists!");
+        }
     }
 
     @Override
-    public ProductResponse getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        List<ProductDTO> productDTOS = products.stream().map(product -> modelMapper.map(product,ProductDTO.class)).toList();
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setContents(productDTOS);
-        return productResponse;
+    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        //TODO Remove code duplicate for Pagination and ProductResponse.setContent()
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy);
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize,sortByAndOrder);
+        Page<Product> productsPage = productRepository.findAll(pageDetails);
+
+        return getProductResponse(productsPage);
     }
 
     @Override
-    public ProductResponse getByCategory(Long categoryId) {
+    public ProductResponse getByCategory(Long categoryId,Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category","CategoryId",categoryId));
-        List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy);
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize,sortByAndOrder);
+        Page<Product> productsPage = productRepository.findByCategoryOrderByPriceAsc(category,pageDetails);
+
+        return getProductResponse(productsPage);
+    }
+
+    private ProductResponse getProductResponse(Page<Product> productsPage) {
+        List<Product> products = productsPage.getContent();
         List<ProductDTO> productDTOS = products.stream().map(product -> modelMapper.map(product,ProductDTO.class)).toList();
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContents(productDTOS);
+        productResponse.setPageNumber(productsPage.getNumber());
+        productResponse.setPageSize(productsPage.getSize());
+        productResponse.setTotalElements(productsPage.getTotalElements());
+        productResponse.setTotalPages(productsPage.getTotalPages());
+        productResponse.setLastPage(productsPage.isLast());
         return productResponse;
     }
 
     @Override
-    public ProductResponse getProductsByKeyword(String keyword) {
-        List<Product> products = productRepository.findByProductNameLikeIgnoreCase(keyword);
-        List<ProductDTO> productDTOS = products.stream().map(product -> modelMapper.map(product,ProductDTO.class)).toList();
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setContents(productDTOS);
-        return productResponse;
+    public ProductResponse getProductsByKeyword(String keyword,Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy);
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize,sortByAndOrder);
+        Page<Product> productsPage = productRepository.findByProductNameLikeIgnoreCase(keyword,pageDetails);
+        return getProductResponse(productsPage);
     }
 
     @Override
