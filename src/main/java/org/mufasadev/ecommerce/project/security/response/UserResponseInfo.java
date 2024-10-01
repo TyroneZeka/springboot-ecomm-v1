@@ -1,41 +1,24 @@
 package org.mufasadev.ecommerce.project.security.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 public class UserResponseInfo {
+    @Getter
+    @Setter
     private Long id;
-    private String jwtToken;
+    @Setter
+    @Getter
     private String username;
+    @Setter
+    @Getter
     private List<String> roles;
 
-    public UserResponseInfo(Long id, String username, List<String> roles, String jwtToken) {
+    public UserResponseInfo(Long id, String username, List<String> roles) {
         this.id = id;
-        this.username = username;
         this.roles = roles;
-        this.jwtToken = jwtToken;
-    }
-
-    public String getJwtToken() {
-        return jwtToken;
-    }
-
-    public void setJwtToken(String jwtToken) {
-        this.jwtToken = jwtToken;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
         this.username = username;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
     }
 }
