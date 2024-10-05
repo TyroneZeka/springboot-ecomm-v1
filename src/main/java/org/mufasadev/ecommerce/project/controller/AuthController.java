@@ -1,6 +1,7 @@
 package org.mufasadev.ecommerce.project.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.mufasadev.ecommerce.project.models.AppRole;
 import org.mufasadev.ecommerce.project.models.Role;
 import org.mufasadev.ecommerce.project.models.User;
@@ -12,7 +13,6 @@ import org.mufasadev.ecommerce.project.security.request.SignupRequest;
 import org.mufasadev.ecommerce.project.security.response.MessageResponse;
 import org.mufasadev.ecommerce.project.security.response.UserResponseInfo;
 import org.mufasadev.ecommerce.project.security.services.UserDetailsImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -31,22 +31,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
+    private final JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {

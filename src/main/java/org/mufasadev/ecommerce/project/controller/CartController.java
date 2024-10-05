@@ -1,11 +1,11 @@
 package org.mufasadev.ecommerce.project.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.mufasadev.ecommerce.project.models.Cart;
 import org.mufasadev.ecommerce.project.payload.CartDTO;
 import org.mufasadev.ecommerce.project.repository.CartRepository;
 import org.mufasadev.ecommerce.project.service.CartService;
 import org.mufasadev.ecommerce.project.utils.AuthUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +14,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
-    @Autowired
-    private AuthUtils authUtils;
-    @Autowired
-    private CartRepository cartRepository;
+    private final CartService cartService;
+    private final AuthUtils authUtils;
+    private final CartRepository cartRepository;
 
     @PostMapping("carts/products/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDTO> addProductToCart(@PathVariable("productId") Long productId, @PathVariable("quantity") Integer quantity) {
