@@ -17,6 +17,7 @@ import org.mufasadev.ecommerce.project.utils.AuthUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -94,7 +95,11 @@ public class CartServiceImpl implements CartService {
             throw new ResourceNotFoundException("Cart","cartId",cartId);
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
         cart.getCartItems().forEach(c -> c.getProduct().setQuantity(c.getQuantity()));
-        List<ProductDTO> products = cart.getCartItems().stream().map(p-> modelMapper.map(p.getProduct(),ProductDTO.class)).toList();
+        List<ProductDTO> products = cart.getCartItems().stream().map(cartItem -> {
+            ProductDTO productDTO = modelMapper.map(cartItem.getProduct(), ProductDTO.class);
+            productDTO.setQuantity(cartItem.getQuantity()); // Set the quantity from CartItem
+            return productDTO;
+        }).collect(Collectors.toList());
 
         cartDTO.setProducts(products);
         return cartDTO;
